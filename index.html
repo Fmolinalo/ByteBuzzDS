@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Biblioteca - ByteBuzz</title>
+    <style>
+        :root {
+            --color-primary: #2c3e50;
+            --color-secondary: #3498db;
+            --color-accent: #e74c3c;
+            --color-light: #ecf0f1;
+            --color-dark: #2c3e50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f9f9f9;
+            color: var(--color-dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 20px;
+        }
+
+        .university-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .university-header h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+
+        .project-title {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .group-info {
+            background-color: var(--color-light);
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            color: var(--color-primary);
+            border-bottom: 2px solid var(--color-secondary);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background-color: var(--color-light);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            color: var(--color-secondary);
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .tech-item {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-structure {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: var(--color-secondary);
+            color: white;
+        }
+
+        .conclusion-item {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .link-box {
+            background-color: var(--color-light);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .link-box a {
+            color: var(--color-secondary);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .link-box a:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--color-primary);
+            color: white;
+            border-radius: 0 0 8px 8px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+
+            .card-container,
+            .tech-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="university-header">
+                <h1>Universidad Continental</h1>
+                <p>2025</p>
+            </div>
+            <h2 class="project-title">Sistema de Gestión de Biblioteca</h2>
+            <p>Diseño de Software - Grupo ByteBuzz</p>
+        </header>
+
+        <div class="group-info">
+            <h3>Integrantes:</h3>
+            <ul>
+                <li>Huallpa Cobos, Flor Camila</li>
+                <li>Cuchicari Ylla Ruth Sara</li>
+                <li>Caseres Aoki Ryuka Kusi Ooyllor</li>
+                <li>Huaranca Callo Abigail Melody</li>
+                <li>Molina Loaiza Ariana Fabiola</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h3 class="section-title">Presentación del Proyecto</h3>
+            <p>El Sistema de Gestión de Biblioteca es una aplicación web desarrollada para administrar de manera
+                eficiente los procesos de registro, control y préstamo de libros mediante una base de datos relacional
+                en SQL Server y la implementación de operaciones CRUD en ASP.NET.</p>
+            <p>El sistema garantiza un acceso rápido, confiable y seguro a la información bibliográfica, mejorando la
+                experiencia de los usuarios y optimizando la gestión administrativa.</p>
+        </div>
+
+        <div class="section">
+            <h3 class="section-title">Estructura de la Base de Datos</h3>
+            <div class="card-container">
+                <div class="card">
+                    <h4 class="card-title">Tablas Principales</h4>
+                    <ul>
+                        <li>Usuarios - Datos de lectores registrados</li>
+                        <li>Autores - Información de escritores</li>
+                        <li>Libros - Recursos centrales del sistema</li>
+                        <li>Préstamos - Transacciones de entrega</li>
+                        <li>Reservas - Solicitudes anticipadas</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h4 class="card-title">Relaciones</h4>
+                    <ul>
+                        <li>Usuarios ↔ Préstamos (1 a muchos)</li>
+                        <li>Usuarios ↔ Reservas (1 a muchos)</li>
+                        <li>Autores ↔ Libros (1 a muchos)</li>
+                        <li>Libros ↔ Préstamos (1 a muchos)</li>
+                        <li>Libros ↔ Reservas (1 a muchos)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h4>Estructura de Tablas</h4>
+            <div class="table-structure">
+                <table>
+                    <tr>
+                        <th>Tabla</th>
+                        <th>Campos Principales</th>
+                    </tr>
+                    <tr>
+                        <td>Usuarios</td>
+                        <td>UsuarioID, Nombre, Apellido, email, Teléfono, FechaRegistro</td>
+                    </tr>
+                    <tr>
+                        <td>Autores</td>
+                        <td>AutorID, Nombre, Nacionalidad, FechaNacimiento</td>
+                    </tr>
+                    <tr>
+                        <td>Libros</td>
+                        <td>LibroID, Título, AutorID, ISBN, AñoPublicación, Estado</td>
+                    </tr>
+                    <tr>
+                        <td>Préstamos</td>
+                        <td>PréstamoID, UsuarioID, LibroID, FechaPréstamo, FechaDevolución, Estado</td>
+                    </tr>
+                    <tr>
+                        <td>Reservas</td>
+                        <td>ReservaID, UsuarioID, LibroID, FechaReserva, Estado</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3 class="section-title">Tecnologías Utilizadas</h3>
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <h4>Backend</h4>
+                    <p>ASP.NET</p>
+                    <p>C#</p>
+                </div>
+
+                <div class="tech-item">
+                    <h4>Base de Datos</h4>
+                    <p>SQL Server</p>
+                    <p>SQL Query</p>
+                </div>
+
+                <div class="tech-item">
+                    <h4>Frontend</h4>
+                    <p>HTML</p>
+                    <p>CSS</p>
+                </div>
+
+                <div class="tech-item">
+                    <h4>Control de Versiones</h4>
+                    <p>Git</p>
+                    <p>GitHub</p>
+                </div>
+
+                <div class="tech-item">
+                    <h4>Herramientas</h4>
+                    <p>Visual Studio 2022</p>
+                    <p>Draw.io (Diagramas)</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3 class="section-title">Operaciones CRUD Implementadas</h3>
+            <div class="card-container">
+                <div class="card">
+                    <h4 class="card-title">Crear (Create)</h4>
+                    <p>Registro de nuevos usuarios, libros, autores, préstamos y reservas.</p>
+                </div>
+
+                <div class="card">
+                    <h4 class="card-title">Leer (Read)</h4>
+                    <p>Consulta de información existente en todas las tablas de la base de datos.</p>
+                </div>
+
+                <div class="card">
+                    <h4 class="card-title">Actualizar (Update)</h4>
+                    <p>Modificación de registros existentes, como cambiar el estado de un libro o actualizar información
+                        de usuario.</p>
+                </div>
+
+                <div class="card">
+                    <h4 class="card-title">Eliminar (Delete)</h4>
+                    <p>Eliminación de registros obsoletos o erróneos del sistema.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3 class="section-title">Conclusiones y Aprendizajes</h3>
+            <div class="conclusion-item">
+                <h4>Integración de Conocimientos</h4>
+                <p>La práctica permitió aplicar conocimientos de bases de datos, desarrollo web y control de versiones
+                    de manera integrada.</p>
+            </div>
+
+            <div class="conclusion-item">
+                <h4>ASP.NET como Herramienta</h4>
+                <p>ASP.NET resultó ser una herramienta robusta para el manejo de operaciones CRUD y la lógica de
+                    negocio.</p>
+            </div>
+
+            <div class="conclusion-item">
+                <h4>Trabajo Colaborativo</h4>
+                <p>GitHub fue clave para la organización del trabajo en equipo, permitiendo un desarrollo coordinado y
+                    eficiente.</p>
+            </div>
+
+            <div class="conclusion-item">
+                <h4>Recomendaciones Futuras</h4>
+                <p>Para futuros proyectos, se recomienda profundizar en la seguridad de la aplicación y en pruebas
+                    automatizadas.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3 class="section-title">Enlaces de Referencia</h3>
+            <div class="link-box">
+                <h4>Infografía:</h4>
+                <p><a href="#">[Enlace a la infografía]</a></p>
+            </div>
+
+            <div class="link-box">
+                <h4>Repositorio GitHub:</h4>
+                <p><a href="https://github.com/Fmolinalo/ByteBuzz"[Enlace al repositorio]</a></p>
+            </div>
+        </div>
+
+        <footer>
+            <p>Universidad Continental - Diseño de Software - Grupo ByteBuzz</p>
+            <p>© 2025 - "Año de la recuperación y consolidación de la economía peruana"</p>
+        </footer>
+    </div>
+</body>
+
+</html>
