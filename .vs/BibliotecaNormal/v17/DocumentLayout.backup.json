@@ -1,0 +1,103 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\elald\\source\\repos\\BibliotecaNormal\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{D556C0DE-91D1-4137-95F2-18698E9D3077}|BibliotecaNormal\\BibliotecaNormal.csproj|c:\\users\\elald\\source\\repos\\bibliotecanormal\\bibliotecanormal\\login.aspx||{57312C73-6202-49E9-B1E1-40EA1A6DC1F6}",
+      "RelativeMoniker": "D:0:0:{D556C0DE-91D1-4137-95F2-18698E9D3077}|BibliotecaNormal\\BibliotecaNormal.csproj|solutionrelative:bibliotecanormal\\login.aspx||{57312C73-6202-49E9-B1E1-40EA1A6DC1F6}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D556C0DE-91D1-4137-95F2-18698E9D3077}|BibliotecaNormal\\BibliotecaNormal.csproj|C:\\Users\\elald\\source\\repos\\BibliotecaNormal\\bibliotecanormal\\dashboard.aspx||{57312C73-6202-49E9-B1E1-40EA1A6DC1F6}",
+      "RelativeMoniker": "D:0:0:{D556C0DE-91D1-4137-95F2-18698E9D3077}|BibliotecaNormal\\BibliotecaNormal.csproj|solutionrelative:bibliotecanormal\\dashboard.aspx||{57312C73-6202-49E9-B1E1-40EA1A6DC1F6}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D556C0DE-91D1-4137-95F2-18698E9D3077}|BibliotecaNormal\\BibliotecaNormal.csproj|C:\\Users\\elald\\source\\repos\\BibliotecaNormal\\bibliotecanormal\\dashboard.aspx.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D556C0DE-91D1-4137-95F2-18698E9D3077}|BibliotecaNormal\\BibliotecaNormal.csproj|solutionrelative:bibliotecanormal\\dashboard.aspx.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D556C0DE-91D1-4137-95F2-18698E9D3077}|BibliotecaNormal\\BibliotecaNormal.csproj|C:\\Users\\elald\\source\\repos\\BibliotecaNormal\\bibliotecanormal\\libros.aspx||{57312C73-6202-49E9-B1E1-40EA1A6DC1F6}",
+      "RelativeMoniker": "D:0:0:{D556C0DE-91D1-4137-95F2-18698E9D3077}|BibliotecaNormal\\BibliotecaNormal.csproj|solutionrelative:bibliotecanormal\\libros.aspx||{57312C73-6202-49E9-B1E1-40EA1A6DC1F6}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D556C0DE-91D1-4137-95F2-18698E9D3077}|BibliotecaNormal\\BibliotecaNormal.csproj|C:\\Users\\elald\\source\\repos\\BibliotecaNormal\\bibliotecanormal\\libros.aspx.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D556C0DE-91D1-4137-95F2-18698E9D3077}|BibliotecaNormal\\BibliotecaNormal.csproj|solutionrelative:bibliotecanormal\\libros.aspx.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Libros.aspx.cs",
+              "DocumentMoniker": "C:\\Users\\elald\\source\\repos\\BibliotecaNormal\\BibliotecaNormal\\Libros.aspx.cs",
+              "RelativeDocumentMoniker": "BibliotecaNormal\\Libros.aspx.cs",
+              "ToolTip": "C:\\Users\\elald\\source\\repos\\BibliotecaNormal\\BibliotecaNormal\\Libros.aspx.cs",
+              "RelativeToolTip": "BibliotecaNormal\\Libros.aspx.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAAxAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-17T18:45:23.196Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Libros.aspx",
+              "DocumentMoniker": "C:\\Users\\elald\\source\\repos\\BibliotecaNormal\\BibliotecaNormal\\Libros.aspx",
+              "RelativeDocumentMoniker": "BibliotecaNormal\\Libros.aspx",
+              "ToolTip": "C:\\Users\\elald\\source\\repos\\BibliotecaNormal\\BibliotecaNormal\\Libros.aspx",
+              "RelativeToolTip": "BibliotecaNormal\\Libros.aspx",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000195|",
+              "WhenOpened": "2025-09-17T18:34:41.432Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Dashboard.aspx.cs",
+              "DocumentMoniker": "C:\\Users\\elald\\source\\repos\\BibliotecaNormal\\BibliotecaNormal\\Dashboard.aspx.cs",
+              "RelativeDocumentMoniker": "BibliotecaNormal\\Dashboard.aspx.cs",
+              "ToolTip": "C:\\Users\\elald\\source\\repos\\BibliotecaNormal\\BibliotecaNormal\\Dashboard.aspx.cs",
+              "RelativeToolTip": "BibliotecaNormal\\Dashboard.aspx.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-17T18:09:26.079Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Dashboard.aspx",
+              "DocumentMoniker": "C:\\Users\\elald\\source\\repos\\BibliotecaNormal\\BibliotecaNormal\\Dashboard.aspx",
+              "RelativeDocumentMoniker": "BibliotecaNormal\\Dashboard.aspx",
+              "ToolTip": "C:\\Users\\elald\\source\\repos\\BibliotecaNormal\\BibliotecaNormal\\Dashboard.aspx",
+              "RelativeToolTip": "BibliotecaNormal\\Dashboard.aspx",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000195|",
+              "WhenOpened": "2025-09-17T18:07:55.58Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Login.aspx",
+              "DocumentMoniker": "C:\\Users\\elald\\source\\repos\\BibliotecaNormal\\BibliotecaNormal\\Login.aspx",
+              "RelativeDocumentMoniker": "BibliotecaNormal\\Login.aspx",
+              "ToolTip": "C:\\Users\\elald\\source\\repos\\BibliotecaNormal\\BibliotecaNormal\\Login.aspx",
+              "RelativeToolTip": "BibliotecaNormal\\Login.aspx",
+              "LogicalView": "7651a703-06e5-11d1-8ebd-00a0c90f26ea",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000195|",
+              "WhenOpened": "2025-09-17T17:12:35.991Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

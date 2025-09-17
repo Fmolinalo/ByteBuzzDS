@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+  <EntityContainerMapping StorageEntityContainer="BibliotecaDBModelStoreContainer" CdmEntityContainer="BibliotecaDBEntities1">
+    <EntitySetMapping Name="Autor">
+      <EntityTypeMapping TypeName="BibliotecaDBModel.Autor">
+        <MappingFragment StoreEntitySet="Autor">
+          <ScalarProperty Name="id_autor" ColumnName="id_autor" />
+          <ScalarProperty Name="nombre" ColumnName="nombre" />
+          <ScalarProperty Name="apellido" ColumnName="apellido" />
+          <ScalarProperty Name="nacionalidad" ColumnName="nacionalidad" />
+          <ScalarProperty Name="fecha_nacimiento" ColumnName="fecha_nacimiento" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Categoria">
+      <EntityTypeMapping TypeName="BibliotecaDBModel.Categoria">
+        <MappingFragment StoreEntitySet="Categoria">
+          <ScalarProperty Name="id_categoria" ColumnName="id_categoria" />
+          <ScalarProperty Name="nombre" ColumnName="nombre" />
+          <ScalarProperty Name="descripcion" ColumnName="descripcion" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Devolucion">
+      <EntityTypeMapping TypeName="BibliotecaDBModel.Devolucion">
+        <MappingFragment StoreEntitySet="Devolucion">
+          <ScalarProperty Name="id_devolucion" ColumnName="id_devolucion" />
+          <ScalarProperty Name="id_prestamo" ColumnName="id_prestamo" />
+          <ScalarProperty Name="id_usuario" ColumnName="id_usuario" />
+          <ScalarProperty Name="fecha_devolucion_real" ColumnName="fecha_devolucion_real" />
+          <ScalarProperty Name="multa" ColumnName="multa" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Editorial">
+      <EntityTypeMapping TypeName="BibliotecaDBModel.Editorial">
+        <MappingFragment StoreEntitySet="Editorial">
+          <ScalarProperty Name="id_editorial" ColumnName="id_editorial" />
+          <ScalarProperty Name="nombre" ColumnName="nombre" />
+          <ScalarProperty Name="pais" ColumnName="pais" />
+          <ScalarProperty Name="anio_fundacion" ColumnName="anio_fundacion" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Idioma">
+      <EntityTypeMapping TypeName="BibliotecaDBModel.Idioma">
+        <MappingFragment StoreEntitySet="Idioma">
+          <ScalarProperty Name="id_idioma" ColumnName="id_idioma" />
+          <ScalarProperty Name="nombre" ColumnName="nombre" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Lector">
+      <EntityTypeMapping TypeName="BibliotecaDBModel.Lector">
+        <MappingFragment StoreEntitySet="Lector">
+          <ScalarProperty Name="id_lector" ColumnName="id_lector" />
+          <ScalarProperty Name="dni" ColumnName="dni" />
+          <ScalarProperty Name="nombre" ColumnName="nombre" />
+          <ScalarProperty Name="apellido" ColumnName="apellido" />
+          <ScalarProperty Name="direccion" ColumnName="direccion" />
+          <ScalarProperty Name="telefono" ColumnName="telefono" />
+          <ScalarProperty Name="email" ColumnName="email" />
+          <ScalarProperty Name="fecha_registro" ColumnName="fecha_registro" />
+          <ScalarProperty Name="estado" ColumnName="estado" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Libro">
+      <EntityTypeMapping TypeName="BibliotecaDBModel.Libro">
+        <MappingFragment StoreEntitySet="Libro">
+          <ScalarProperty Name="id_libro" ColumnName="id_libro" />
+          <ScalarProperty Name="titulo" ColumnName="titulo" />
+          <ScalarProperty Name="isbn" ColumnName="isbn" />
+          <ScalarProperty Name="anio_publicacion" ColumnName="anio_publicacion" />
+          <ScalarProperty Name="num_paginas" ColumnName="num_paginas" />
+          <ScalarProperty Name="ejemplares_disponibles" ColumnName="ejemplares_disponibles" />
+          <ScalarProperty Name="id_categoria" ColumnName="id_categoria" />
+          <ScalarProperty Name="id_idioma" ColumnName="id_idioma" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Prestamo">
+      <EntityTypeMapping TypeName="BibliotecaDBModel.Prestamo">
+        <MappingFragment StoreEntitySet="Prestamo">
+          <ScalarProperty Name="id_prestamo" ColumnName="id_prestamo" />
+          <ScalarProperty Name="id_lector" ColumnName="id_lector" />
+          <ScalarProperty Name="id_libro" ColumnName="id_libro" />
+          <ScalarProperty Name="id_usuario" ColumnName="id_usuario" />
+          <ScalarProperty Name="fecha_prestamo" ColumnName="fecha_prestamo" />
+          <ScalarProperty Name="fecha_devolucion_estimada" ColumnName="fecha_devolucion_estimada" />
+          <ScalarProperty Name="estado" ColumnName="estado" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Usuario">
+      <EntityTypeMapping TypeName="BibliotecaDBModel.Usuario">
+        <MappingFragment StoreEntitySet="Usuario">
+          <ScalarProperty Name="id_usuario" ColumnName="id_usuario" />
+          <ScalarProperty Name="username" ColumnName="username" />
+          <ScalarProperty Name="password_hash" ColumnName="password_hash" />
+          <ScalarProperty Name="rol" ColumnName="rol" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <AssociationSetMapping Name="LibroAutor" TypeName="BibliotecaDBModel.LibroAutor" StoreEntitySet="LibroAutor">
+      <EndProperty Name="Autor">
+        <ScalarProperty Name="id_autor" ColumnName="id_autor" />
+      </EndProperty>
+      <EndProperty Name="Libro">
+        <ScalarProperty Name="id_libro" ColumnName="id_libro" />
+      </EndProperty>
+    </AssociationSetMapping>
+    <AssociationSetMapping Name="LibroEditorial" TypeName="BibliotecaDBModel.LibroEditorial" StoreEntitySet="LibroEditorial">
+      <EndProperty Name="Editorial">
+        <ScalarProperty Name="id_editorial" ColumnName="id_editorial" />
+      </EndProperty>
+      <EndProperty Name="Libro">
+        <ScalarProperty Name="id_libro" ColumnName="id_libro" />
+      </EndProperty>
+    </AssociationSetMapping>
+  </EntityContainerMapping>
+</Mapping>
