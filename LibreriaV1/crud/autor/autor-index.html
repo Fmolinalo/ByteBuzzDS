@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRUD Autores</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Gestión de Autores ✍️</h1>
+
+    <form id="formAutores">
+      <input type="hidden" id="autorId">
+
+      <input type="text" id="nombre" placeholder="Nombre" required>
+      <input type="text" id="apellido" placeholder="Apellido" required>
+      <input type="text" id="nacionalidad" placeholder="Nacionalidad">
+      <input type="date" id="fechaNacimiento">
+
+      <button type="submit" id="btnGuardar">Guardar</button>
+      <button type="button" id="btnCancelar" class="oculto">Cancelar</button>
+    </form>
+
+    <h2>Lista de Autores</h2>
+    <table id="tablaAutores">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Apellido</th>
+          <th>Nacionalidad</th>
+          <th>Fecha Nac.</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Filas dinámicas -->
+      </tbody>
+    </table>
+
+    <button id="btnVolver" class="volver">⬅️ Volver al Menú</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

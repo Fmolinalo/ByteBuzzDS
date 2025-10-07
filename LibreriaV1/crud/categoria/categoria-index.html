@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Categorías</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Gestión de Categorías</h1>
+
+  <form id="categoriaForm">
+    <input type="text" id="nombre" placeholder="Nombre de la categoría" required>
+    <button type="submit">Agregar Categoría</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="tablaCategorias"></tbody>
+  </table>
+
+  <button onclick="window.location.href='../index.html'" class="volver">Volver al menú</button>
+
+  <script src="script.js"></script>
+</body>
+</html>
