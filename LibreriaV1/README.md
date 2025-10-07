@@ -1,7 +1,7 @@
-Progressus - Free business/corporate Bootstrap template
+Programa: El caldero de los libros 
 =============
 
-Progressus is a free, responsive, nice-looking business template based on Bootstrap HTML/CSS framework. 
+Una pagina web para la reserva de libros 
 
 
 License
@@ -30,3 +30,4 @@ Credits
 * Design and development: **Sergey Pozhilov** - http://pozhilov.com
 * Photos used in template: **Unsplash** - http://unsplash.com
 * More free templates by Sergey: http://gettemplate.com
+
