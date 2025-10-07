@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (username === "admin" && password === "1234") {
             alert("Inicio de sesión exitoso");
-            window.location.href = "index.html";
+            window.location.href = "crud/index.html";
         } else {
             alert("Usuario o contraseña incorrectos ❌");
         }

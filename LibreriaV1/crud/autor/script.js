@@ -20,61 +20,73 @@ function renderTabla(autores) {
   autores.forEach(a => {
     const fila = document.createElement('tr');
     fila.innerHTML = `
-      <td>${a.id}</td>
-      <td>${a.nombre}</td>
-      <td>${a.nacionalidad || '-'}</td>
+      <td>${a.AutorID}</td>
+      <td>${a.Nombre}</td>
+      <td>${a.Apellido}</td>
+      <td>${a.Nacionalidad || '-'}</td>
+      <td>${a.FechaNacimiento || '-'}</td>
       <td>
-        <button class="btn-accion btn-editar" onclick="editarAutor(${a.id}, '${a.nombre}', '${a.nacionalidad || ''}')">✏️</button>
-        <button class="btn-accion btn-eliminar" onclick="eliminarAutor(${a.id})">🗑️</button>
+        <button class="btn-accion btn-editar" onclick="editarAutor(${a.AutorID}, '${a.Nombre}', '${a.Apellido}', '${a.Nacionalidad || ''}', '${a.FechaNacimiento || ''}')">✏️</button>
+        <button class="btn-accion btn-eliminar" onclick="eliminarAutor(${a.AutorID})">🗑️</button>
       </td>
     `;
     tabla.appendChild(fila);
   });
 }
 
+
 // --- GUARDAR O ACTUALIZAR AUTOR ---
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const nombre = document.getElementById('nombre').value.trim();
-  const nacionalidad = document.getElementById('nacionalidad').value.trim();
+  const apellido = document.getElementById('apellido').value.trim();
+  const nacionalidad = document.getElementById('nacionalidad').value.trim() || null;
+  const fechaNacimiento = document.getElementById('fechaNacimiento').value || null;
 
-  if (!nombre) {
-    alert('El nombre es obligatorio');
+  if (!nombre || !apellido) {
+    alert('Nombre y Apellido son obligatorios');
     return;
   }
 
-  const data = { nombre, nacionalidad };
+  const data = { Nombre: nombre, Apellido: apellido, Nacionalidad: nacionalidad, FechaNacimiento: fechaNacimiento };
 
-  if (editando) {
-    await fetch(`http://localhost:3000/api/autores/${autorId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    editando = false;
-    autorId = null;
-  } else {
-    await fetch('http://localhost:3000/api/autores', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
+  try {
+    if (editando) {
+      await fetch(`http://localhost:3000/api/autores/${autorId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      editando = false;
+      autorId = null;
+    } else {
+      await fetch('http://localhost:3000/api/autores', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+    }
+    form.reset();
+    btnCancelar.classList.add('oculto');
+    cargarAutores();
+  } catch (err) {
+    console.error('Error al guardar autor:', err);
   }
-
-  form.reset();
-  btnCancelar.classList.add('oculto');
-  cargarAutores();
 });
 
+
 // --- EDITAR AUTOR ---
-function editarAutor(id, nombre, nacionalidad) {
+function editarAutor(id, nombre, apellido, nacionalidad, fechaNacimiento) {
   autorId = id;
   document.getElementById('nombre').value = nombre;
-  document.getElementById('nacionalidad').value = nacionalidad;
+  document.getElementById('apellido').value = apellido;
+  document.getElementById('nacionalidad').value = nacionalidad || '';
+  document.getElementById('fechaNacimiento').value = fechaNacimiento || '';
 
   editando = true;
   btnCancelar.classList.remove('oculto');
 }
+
 
 // --- ELIMINAR AUTOR ---
 async function eliminarAutor(id) {

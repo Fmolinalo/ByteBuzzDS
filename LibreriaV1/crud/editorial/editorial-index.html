@@ -9,24 +9,27 @@
 <body>
   <h1>Gestión de Editoriales</h1>
 
-  <form id="editorialForm">
-    <input type="text" id="nombre" placeholder="Nombre de la editorial" required>
-    <input type="text" id="pais" placeholder="País">
-    <button type="submit">Agregar Editorial</button>
-  </form>
+<form id="editorialForm">
+  <input type="text" id="nombreEd" placeholder="Nombre de la editorial" required>
+  <input type="text" id="telefono" placeholder="Teléfono">
+  <input type="email" id="email" placeholder="Email">
+  <button type="submit">Agregar Editorial</button>
+</form>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>País</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody id="tablaEditoriales"></tbody>
-  </table>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>Teléfono</th>
+      <th>Email</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody id="tablaEditoriales"></tbody>
+</table>
 
-  <button onclick="window.location.href='../index.html'" class="volver">Volver al menú</button>
+  <button onclick="window.location.href='../main.html'" class="volver">Volver al menú</button>
 
   <script src="script.js"></script>
 </body>
