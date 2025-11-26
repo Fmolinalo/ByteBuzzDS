@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pastelería Santa Teresa - Sistema Conectado</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Iconos Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Fuentes -->
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .pacifico { font-family: 'Pacifico', cursive; }
+        
+        /* Animaciones */
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Estilos Mágicos */
+        .btn-magic {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-magic:hover {
+            filter: brightness(1.1);
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+        }
+
+        /* Utilidades de impresión */
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background-color: white; }
+            .print-container { box-shadow: none; border: none; margin: 0; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+        // ==========================================
+        // 1. CONFIGURACIÓN Y ESTADO GLOBAL
+        // ==========================================
+        const API_URL = 'http://localhost:5000/api'; // Dirección del servidor Python
+        
+        // LLAVE GEMINI INTEGRADA (No visual)
+        const GEMINI_KEY = 'AIzaSyBaV8hnzhbCjS7h1ye20SC30uFi5HFHFgU'; 
+
+        const state = {
+            user: null,
+            view: 'login',
+            apiKey: GEMINI_KEY, // Se asigna automáticamente
+            products: [],
+            cart: [],
+            history: [],
+            invoiceSelected: null,
+            marketing: { selectedId: null, text: '', loading: false },
+            assistant: { response: '', loading: false },
+            forms: { 
+                login: { email: '', password: '' },
+                register: { nombre: '', email: '', password: '', telefono: '' }
+            }
+        };
+
+        // ==========================================
+        // 2. SERVICIOS API (Backend Python)
+        // ==========================================
+        async function fetchAPI(endpoint, method = 'GET', body = null) {
+            try {
+                const options = { method, headers: { 'Content-Type': 'application/json' } };
+                if (body) options.body = JSON.stringify(body);
+                
+                const res = await fetch(`${API_URL}${endpoint}`, options);
+                return await res.json();
+            } catch (e) {
+                console.error("Error de conexión:", e);
+                alert("Error de conexión: Asegúrate de ejecutar 'python app.py' en la terminal.");
+                return null;
+            }
+        }
+
+        // ==========================================
+        // 3. SERVICIOS IA (Gemini)
+        // ==========================================
+        async function callGemini(prompt) {
+            if (!state.apiKey) return "Error: Llave API no configurada internamente.";
+            
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${state.apiKey}`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                const data = await response.json();
+                if(data.error) throw new Error(data.error.message);
+                return data.candidates?.[0]?.content?.parts?.[0]?.text || "Sin respuesta.";
+            } catch (e) {
+                return `Error de IA: ${e.message}`;
+            }
+        }
+
+        // Utilidades de formato
+        const formatCurrency = (amount) => `S/ ${parseFloat(amount).toFixed(2)}`;
+        const formatDate = (dateStr) => new Date(dateStr).toLocaleString('es-PE');
+
+        // ==========================================
+        // 4. LÓGICA DE NEGOCIO
+        // ==========================================
+        
+        // --- Autenticación ---
+        async function handleLogin() {
+            const { email, password } = state.forms.login;
+            if(!email || !password) return alert("Completa los datos");
+            
+            const res = await fetchAPI('/login', 'POST', { email, password });
+            if (res && res.success) {
+                state.user = res.user;
+                // Redirigir según rol
+                state.view = state.user.rol === 'cliente' ? 'inicio' : 'factura';
+                await loadProducts();
+                render();
+            } else {
+                alert(res?.message || "Error al iniciar sesión");
+            }
+        }
+
+        async function handleRegister() {
+            const f = state.forms.register;
+            if(!f.nombre || !f.email || !f.password) return alert("Faltan datos obligatorios");
+            
+            const res = await fetchAPI('/register', 'POST', f);
+            if (res && res.success) {
+                alert("¡Registro exitoso! Por favor inicia sesión.");
+                state.view = 'login';
+                render();
+            } else {
+                alert("Error al registrar: " + (res?.message || "Intente de nuevo"));
+            }
+        }
+
+        // --- Carga de Datos ---
+        async function loadProducts() {
+            const data = await fetchAPI('/products');
+            if (data) state.products = data;
+        }
+
+        async function loadHistory() {
+            const data = await fetchAPI('/history');
+            if (data) state.history = data;
+        }
+
+        // --- Carrito y Ventas ---
+        function addToCart(id) {
+            const prod = state.products.find(p => p.id === id);
+            const exists = state.cart.find(i => i.id === id);
+            if(exists) exists.cant++;
+            else state.cart.push({...prod, cant: 1});
+            render();
+        }
+
+        async function processSale() {
+            const clientName = document.getElementById('clientName') ? document.getElementById('clientName').value : (state.user.rol === 'cliente' ? state.user.nombre : 'Cliente General');
+            const clientPhone = document.getElementById('clientPhone') ? document.getElementById('clientPhone').value : (state.user.rol === 'cliente' ? state.user.telefono : '');
+            
+            if (state.cart.length === 0) return alert("El carrito está vacío");
+
+            const total = state.cart.reduce((sum, i) => sum + (i.precio * i.cant), 0);
+            
+            const payload = {
+                vendedor_id: state.user.id,
+                cliente_nombre: clientName || 'Cliente General',
+                total: total,
+                items: state.cart
+            };
+
+            const res = await fetchAPI('/sales', 'POST', payload);
+            
+            if (res && res.success) {
+                // Generar mensaje WhatsApp
+                const itemsList = state.cart.map(i => `- ${i.cant}x ${i.nombre}`).join('%0A');
+                const msg = `*BOLETA ${res.boleta}*%0ACliente: ${clientName}%0A${itemsList}%0ATotal: S/${total.toFixed(2)}%0AGracias por su compra!`;
+                
+                if (clientPhone) window.open(`https://wa.me/51${clientPhone}?text=${msg}`, '_blank');
+                
+                alert(`Venta registrada correctamente. Boleta: ${res.boleta}`);
+                state.cart = [];
+                
+                // Si es trabajador, preguntar si quiere ver la boleta
+                if(state.user.rol !== 'cliente' && confirm("¿Ver boleta ahora?")) {
+                    state.view = 'boletas';
+                    await loadHistory();
+                }
+                
+                render();
+            } else {
+                alert("Error al guardar la venta en base de datos: " + (res?.message || "Error desconocido"));
+            }
+        }
+
+        // --- Funciones IA ---
+        async function askMarketing() {
+            if(!state.marketing.selectedId) return;
+            state.marketing.loading = true; 
+            render();
+            
+            const prod = state.products.find(p => p.id === state.marketing.selectedId);
+            const prompt = `Actúa como un experto en marketing digital. Escribe un post de Instagram atractivo, corto y persuasivo para vender el siguiente producto de pastelería: ${prod.nombre} (${prod.desc}) a S/${prod.precio}. Usa emojis relevantes.`;
+            
+            const text = await callGemini(prompt);
+            state.marketing.text = text;
+            state.marketing.loading = false; 
+            render();
+        }
+
+        async function askChef() {
+            const q = document.getElementById('aiQuery').value;
+            if(!q) return;
+            
+            state.assistant.loading = true; 
+            render();
+            
+            // Enfocar input después de renderizar para no perder el foco (truco simple)
+            setTimeout(() => document.getElementById('aiQuery')?.focus(), 50);
+
+            const prods = state.products.map(p => p.nombre).join(', ');
+            const prompt = `Eres un chef pastelero amable llamado "Chef Santa Teresa". Recomienda 1 o 2 productos de esta lista [${prods}] para un cliente que dice: "${q}". Sé breve y empático.`;
+            
+            const text = await callGemini(prompt);
+            state.assistant.response = text;
+            state.assistant.loading = false; 
+            render();
+            setTimeout(() => document.getElementById('aiQuery')?.focus(), 50);
+        }
+
+        // --- Gestión de Boletas ---
+        function viewInvoice(id) {
+            state.invoiceSelected = state.history.find(v => v.id === id);
+            // Para mostrar detalles completos, necesitaríamos hacer otra llamada a API, 
+            // pero por ahora usaremos los datos básicos del historial o simularemos los items si no vienen.
+            // En una implementación completa, el endpoint /history debería devolver items o tener un endpoint /invoice/:id
+            if (!state.invoiceSelected.items) {
+                // Simulación visual si la API de historial es simple
+                state.invoiceSelected.items = [{nombre: 'Productos Varios', cant: 1, precio: state.invoiceSelected.total}];
+            }
+            render();
+        }
+
+        function closeInvoice() {
+            state.invoiceSelected = null;
+            render();
+        }
+
+        // ==========================================
+        // 5. RENDERIZADO (Vistas HTML)
+        // ==========================================
+        const app = document.getElementById('app');
+
+        function render() {
+            app.innerHTML = '';
+            
+            if (state.view === 'login') {
+                app.innerHTML = renderLogin();
+            } else if (state.view === 'register') {
+                app.innerHTML = renderRegister();
+            } else if (state.user?.rol === 'cliente') {
+                app.innerHTML = renderClientLayout();
+            } else {
+                app.innerHTML = renderWorkerLayout();
+            }
+            
+            // Re-inicializar iconos después de cada render
+            lucide.createIcons();
+        }
+
+        // --- VISTA LOGIN (Sin campo API Key) ---
+        function renderLogin() {
+            return `
+            <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-800 to-pink-700 p-4 relative overflow-hidden">
+                <div class="absolute top-10 left-10 text-white opacity-10 text-9xl">🍩</div>
+                <div class="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 max-w-md w-full text-center relative z-10">
+                    <div class="mb-6 flex justify-center"><div class="bg-gradient-to-r from-purple-500 to-pink-500 p-4 rounded-full shadow-lg"><i data-lucide="cake-slice" class="text-white w-12 h-12"></i></div></div>
+                    <h1 class="text-4xl font-bold text-gray-800 mb-2 pacifico">Santa Teresa</h1>
+                    <p class="text-gray-500 mb-6">Sistema Inteligente</p>
+                    
+                    <!-- Campo API Key eliminado, se usa la constante interna -->
+                    
+                    <div class="space-y-4">
+                        <input type="email" placeholder="Correo" class="w-full p-3 border rounded-xl text-sm focus:ring-2 focus:ring-purple-500 outline-none" onchange="state.forms.login.email=this.value">
+                        <input type="password" placeholder="Contraseña" class="w-full p-3 border rounded-xl text-sm focus:ring-2 focus:ring-purple-500 outline-none" onchange="state.forms.login.password=this.value">
+                        
+                        <button onclick="handleLogin()" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-4 rounded-xl flex justify-center gap-2 transition-all font-bold mt-4">
+                            Ingresar
+                        </button>
+                        
+                        <div class="border-t border-gray-200 my-4"></div>
+                        
+                        <button onclick="state.view='register'; render()" class="w-full bg-white text-purple-700 border-2 border-purple-100 hover:bg-purple-50 py-3 rounded-xl flex justify-center gap-2 transition-all font-medium">
+                            Registrarme como Cliente
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        // --- VISTA REGISTRO ---
+        function renderRegister() {
+            return `
+            <div class="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+                <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+                    <h2 class="text-2xl font-bold text-center mb-6 text-purple-800">Registro Nuevo Cliente</h2>
+                    <input type="text" placeholder="Nombre Completo" class="w-full p-3 mb-3 border rounded-lg" onchange="state.forms.register.nombre=this.value">
+                    <input type="email" placeholder="Correo" class="w-full p-3 mb-3 border rounded-lg" onchange="state.forms.register.email=this.value">
+                    <input type="text" placeholder="Teléfono" class="w-full p-3 mb-3 border rounded-lg" onchange="state.forms.register.telefono=this.value">
+                    <input type="password" placeholder="Contraseña" class="w-full p-3 mb-6 border rounded-lg" onchange="state.forms.register.password=this.value">
+                    <div class="flex gap-3">
+                        <button onclick="state.view='login'; render()" class="flex-1 bg-gray-200 py-3 rounded-lg font-medium hover:bg-gray-300 transition">Cancelar</button>
+                        <button onclick="handleRegister()" class="flex-1 bg-purple-600 text-white py-3 rounded-lg font-bold hover:bg-purple-700 transition">Crear Cuenta</button>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        // --- LAYOUT TRABAJADOR ---
+        function renderWorkerLayout() {
+            if(state.view === 'boletas' && state.history.length === 0) loadHistory();
+            
+            const content = getWorkerContent();
+            
+            return `
+            <div class="flex min-h-screen">
+                <div class="w-64 bg-slate-900 text-white hidden md:block fixed h-full z-20 no-print">
+                    <div class="p-6 border-b border-slate-700">
+                        <h2 class="text-xl font-bold flex items-center gap-2 pacifico"><i data-lucide="chef-hat" class="text-yellow-400"></i> Santa Teresa</h2>
+                        <p class="text-slate-400 text-xs mt-1">Panel de Trabajador</p>
+                    </div>
+                    <nav class="p-4 space-y-2">
+                        ${renderSidebarLink('factura', 'receipt', 'Vender')}
+                        ${renderSidebarLink('boletas', 'file-text', 'Historial Boletas')}
+                        ${renderSidebarLink('marketing', 'sparkles', 'Marketing AI ✨')}
+                    </nav>
+                    <div class="absolute bottom-0 w-full p-4 border-t border-slate-700">
+                        <button onclick="location.reload()" class="flex items-center gap-2 text-red-400 hover:text-red-300 text-sm w-full p-2"><i data-lucide="log-out" class="w-4 h-4"></i> Cerrar Sesión</button>
+                    </div>
+                </div>
+                <div class="flex-1 md:ml-64 p-4 md:p-8 bg-gray-50 min-h-screen">
+                    <header class="flex justify-between items-center mb-8 no-print">
+                        <h1 class="text-2xl font-bold text-gray-800 capitalize flex items-center gap-2">${state.view === 'marketing' ? 'Marketing AI ✨' : state.view}</h1>
+                        <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-sm">
+                            <div class="bg-purple-100 p-2 rounded-full"><i data-lucide="user" class="text-purple-600 w-4 h-4"></i></div>
+                            <span class="text-sm font-medium text-gray-600">${state.user.nombre}</span>
+                        </div>
+                    </header>
+                    ${content}
+                </div>
+            </div>`;
+        }
+
+        function renderSidebarLink(view, icon, label) {
+            const active = state.view === view ? 'bg-white/20 border-l-4 border-yellow-400' : 'text-slate-300 hover:bg-white/10';
+            return `<button onclick="state.view='${view}'; render()" class="w-full flex items-center gap-3 p-3 rounded-lg text-sm transition-all ${active}"><i data-lucide="${icon}" class="w-5 h-5"></i> ${label}</button>`;
+        }
+
+        function getWorkerContent() {
+            // Vista FACTURA (POS)
+            if (state.view === 'factura') {
+                const total = state.cart.reduce((sum, i) => sum + (i.precio * i.cant), 0);
+                return `
+                <div class="flex flex-col lg:flex-row gap-6">
+                    <div class="lg:w-2/3">
+                        <div class="bg-white p-6 rounded-xl shadow-sm mb-6">
+                            <h3 class="font-bold mb-4 text-gray-700 flex items-center gap-2"><i data-lucide="user"></i> Datos Cliente</h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <input type="text" id="clientName" placeholder="Nombre Cliente (Opcional)" class="p-3 border rounded-lg w-full outline-none focus:ring-2 focus:ring-purple-500">
+                                <input type="text" id="clientPhone" placeholder="Celular WhatsApp (51...)" class="p-3 border rounded-lg w-full outline-none focus:ring-2 focus:ring-purple-500">
+                            </div>
+                        </div>
+                        <h3 class="font-bold mb-4 text-gray-700">Productos Disponibles</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            ${state.products.map(p => `
+                                <button onclick="addToCart(${p.id})" class="bg-white p-4 rounded-xl shadow-sm hover:shadow-md text-left border border-gray-100 transition-all hover:border-purple-300 active:scale-95">
+                                    <div class="flex justify-between mb-2"><span class="text-3xl">${p.img}</span><span class="font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded text-sm">S/${p.precio}</span></div>
+                                    <p class="font-bold text-gray-800 text-sm leading-tight">${p.nombre}</p>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="lg:w-1/3">
+                        <div class="bg-white p-6 rounded-xl shadow-lg sticky top-6 border border-purple-100">
+                            <h3 class="font-bold text-xl mb-4 border-b pb-2 text-gray-800">Venta Actual</h3>
+                            <div class="space-y-3 mb-6 max-h-80 overflow-y-auto">
+                                ${state.cart.length === 0 ? '<p class="text-gray-400 text-center py-4 italic">Carrito vacío</p>' : 
+                                  state.cart.map(i => `
+                                    <div class="flex justify-between text-sm items-center bg-gray-50 p-2 rounded">
+                                        <span><b class="text-purple-700">${i.cant}x</b> ${i.nombre}</span>
+                                        <span class="font-medium">S/${(i.precio * i.cant).toFixed(2)}</span>
+                                    </div>`).join('')}
+                            </div>
+                            <div class="border-t pt-4">
+                                <div class="flex justify-between text-xl font-bold mb-6 text-gray-800"><span>Total</span><span>${formatCurrency(total)}</span></div>
+                                <button onclick="processSale()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl flex justify-center gap-2 shadow-lg shadow-green-100 transition-all transform hover:-translate-y-1">
+                                    <i data-lucide="check-circle"></i> Confirmar Venta
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }
+            // Vista BOLETAS (Historial)
+            if (state.view === 'boletas') {
+                if (state.invoiceSelected) {
+                    const v = state.invoiceSelected;
+                    return `
+                    <div class="max-w-2xl mx-auto fade-in">
+                        <div class="flex gap-2 mb-4 no-print">
+                            <button onclick="closeInvoice()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition flex items-center gap-2"><i data-lucide="arrow-left" class="w-4 h-4"></i> Volver</button>
+                            <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2"><i data-lucide="printer" class="w-4 h-4"></i> Imprimir</button>
+                        </div>
+                        <div class="bg-white p-8 rounded-lg shadow-lg print-container border border-gray-200">
+                            <div class="text-center border-b-2 border-gray-100 pb-4 mb-6">
+                                <div class="flex justify-center mb-2 text-4xl">🍩</div>
+                                <h1 class="text-3xl font-bold text-purple-800 pacifico">Santa Teresa</h1>
+                                <p class="text-gray-600 text-sm mt-1">Cusco - Perú | RUC: 20123456789</p>
+                            </div>
+                            <div class="bg-purple-50 p-4 rounded-lg text-center mb-6 border border-purple-100">
+                                <h2 class="font-bold text-purple-900 text-sm uppercase tracking-wide">BOLETA DE VENTA ELECTRÓNICA</h2>
+                                <p class="text-xl font-bold text-gray-800 mt-1 font-mono">${v.codigo}</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-sm mb-6 text-gray-700">
+                                <div><p class="text-gray-500 text-xs uppercase">Fecha Emisión</p><p class="font-semibold">${v.fecha}</p></div>
+                                <div><p class="text-gray-500 text-xs uppercase">Cliente</p><p class="font-semibold">${v.cliente}</p></div>
+                                <div><p class="text-gray-500 text-xs uppercase">Vendedor</p><p class="font-semibold">${v.vendedor}</p></div>
+                                <div><p class="text-gray-500 text-xs uppercase">Método Pago</p><p class="font-semibold">Efectivo</p></div>
+                            </div>
+                            <table class="w-full mb-6">
+                                <thead class="bg-gray-50">
+                                    <tr class="text-left text-xs text-gray-500 uppercase">
+                                        <th class="p-2 rounded-l">Cant</th>
+                                        <th class="p-2">Descripción</th>
+                                        <th class="text-right p-2 rounded-r">Importe</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100 text-sm">
+                                    ${v.items ? v.items.map(i => `<tr><td class="p-2 text-center font-bold">${i.cant}</td><td class="p-2">${i.nombre}</td><td class="p-2 text-right">${formatCurrency(i.precio * i.cant)}</td></tr>`).join('') : 
+                                      `<tr><td class="p-2 text-center">-</td><td class="p-2 text-center italic text-gray-400">Detalles no cargados en vista rápida</td><td class="p-2 text-right">${formatCurrency(v.total)}</td></tr>`}
+                                </tbody>
+                            </table>
+                            <div class="flex justify-end border-t-2 border-gray-100 pt-4">
+                                <div class="text-right">
+                                    <p class="text-sm text-gray-500 uppercase">Importe Total</p>
+                                    <p class="text-2xl font-bold text-purple-900">${formatCurrency(v.total)}</p>
+                                </div>
+                            </div>
+                            <div class="mt-8 text-center text-xs text-gray-400">
+                                <p>Gracias por su preferencia</p>
+                                <p>¡Vuelva pronto!</p>
+                            </div>
+                        </div>
+                    </div>`;
+                }
+                return `
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-gray-700 text-lg">Historial de Ventas</h3>
+                        <button onclick="loadHistory(); render()" class="text-sm text-purple-600 hover:underline flex items-center gap-1"><i data-lucide="refresh-cw" class="w-3 h-3"></i> Actualizar</button>
+                    </div>
+                    <div class="space-y-3">
+                        ${state.history.length === 0 ? '<div class="text-center py-8 text-gray-400"><i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-50"></i><p>No hay ventas registradas</p></div>' : 
+                          state.history.map(v => `
+                            <div class="flex items-center justify-between p-4 border rounded-lg hover:shadow-md transition-all hover:border-purple-200 bg-white group">
+                                <div class="flex items-center gap-4">
+                                    <div class="bg-purple-100 p-2 rounded-full text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors"><i data-lucide="file-text" class="w-5 h-5"></i></div>
+                                    <div>
+                                        <p class="font-bold text-gray-800 font-mono text-sm">${v.codigo}</p>
+                                        <p class="text-xs text-gray-500">${v.fecha} • ${v.cliente}</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-bold text-lg text-gray-800">${formatCurrency(v.total)}</p>
+                                    <button onclick="viewInvoice(${v.id})" class="text-purple-600 text-xs font-bold hover:underline mt-1 block">Ver Detalle</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
+            }
+            // Vista MARKETING
+            if (state.view === 'marketing') {
+                return `
+                <div class="flex flex-col lg:flex-row gap-6 h-[calc(100vh-140px)]">
+                    <div class="lg:w-1/2 overflow-y-auto pr-2">
+                        <h3 class="font-bold text-gray-700 mb-4">1. Selecciona un Producto</h3>
+                        <div class="grid grid-cols-1 gap-3">
+                            ${state.products.map(p => `
+                                <div onclick="state.marketing.selectedId=${p.id}; render()" class="p-4 bg-white border-2 rounded-xl cursor-pointer transition-all flex gap-4 items-center ${state.marketing.selectedId === p.id ? 'border-purple-500 bg-purple-50 shadow-sm' : 'border-transparent hover:border-purple-200 hover:bg-white shadow-sm'}">
+                                    <span class="text-4xl">${p.img}</span>
+                                    <div>
+                                        <h4 class="font-bold text-gray-800">${p.nombre}</h4>
+                                        <p class="text-xs text-gray-500 line-clamp-1">${p.desc}</p>
+                                        <span class="text-purple-600 font-bold text-xs">S/${p.precio}</span>
+                                    </div>
+                                    ${state.marketing.selectedId === p.id ? '<i data-lucide="check-circle" class="ml-auto text-purple-600"></i>' : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="lg:w-1/2 flex flex-col">
+                        <div class="bg-white rounded-2xl shadow-lg p-6 border border-purple-100 h-full flex flex-col">
+                            <div class="flex items-center gap-2 mb-4">
+                                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-2 rounded-lg text-white"><i data-lucide="sparkles" class="w-5 h-5"></i></div>
+                                <h3 class="font-bold text-xl text-gray-800">Generador de Marketing IA</h3>
+                            </div>
+                            <div class="flex-1 bg-gray-50 rounded-xl p-6 mb-4 border border-gray-100 overflow-y-auto">
+                                ${state.marketing.loading ? 
+                                  '<div class="h-full flex flex-col items-center justify-center text-purple-600"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mb-2"></div><p class="animate-pulse font-medium">Creando magia...</p></div>' : 
+                                  state.marketing.text ? `<div class="fade-in"><p class="text-gray-700 whitespace-pre-wrap text-lg leading-relaxed">${state.marketing.text}</p></div>` : 
+                                  '<div class="h-full flex flex-col items-center justify-center text-gray-400"><i data-lucide="mouse-pointer-click" class="w-8 h-8 mb-2 opacity-50"></i><p>Selecciona un producto para empezar</p></div>'}
+                            </div>
+                            <button onclick="askMarketing()" ${!state.marketing.selectedId || state.marketing.loading ? 'disabled' : ''} class="w-full btn-magic py-4 rounded-xl font-bold text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex justify-center gap-2 transition-all">
+                                <i data-lucide="wand-2"></i> Generar Descripción Mágica
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+            }
+        }
+
+        // --- LAYOUT CLIENTE ---
+        function renderClientLayout() {
+            const total = state.cart.reduce((acc, i) => acc + (i.precio * i.cant), 0);
+            const content = getClientContent(total);
+
+            return `
+            <div class="min-h-screen bg-slate-100 pb-24">
+                <div class="bg-white shadow-sm p-4 sticky top-0 z-20 flex justify-between items-center">
+                    <h1 class="font-bold text-purple-700 text-xl pacifico">Santa Teresa</h1>
+                    <div class="flex gap-3 items-center">
+                        <span class="text-xs text-gray-500 font-bold bg-gray-100 px-2 py-1 rounded-full">Hola, ${state.user.nombre.split(' ')[0]}</span>
+                        <button onclick="location.reload()" class="text-gray-400 hover:text-red-500"><i data-lucide="log-out" class="w-5 h-5"></i></button>
+                    </div>
+                </div>
+                <div class="p-4 max-w-md mx-auto">${content}</div>
+                <div class="fixed bottom-0 w-full bg-white border-t flex justify-around p-2 pb-4 z-30 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+                    <button onclick="state.view='inicio'; render()" class="flex flex-col items-center text-xs p-2 rounded-xl transition-all ${state.view==='inicio'?'text-purple-600 bg-purple-50':'text-gray-400'}"><i data-lucide="home" class="w-6 h-6 mb-1"></i> Inicio</button>
+                    <button onclick="state.view='asistente'; render()" class="flex flex-col items-center text-xs p-2 rounded-xl transition-all ${state.view==='asistente'?'text-purple-600 bg-purple-50':'text-gray-400'}"><i data-lucide="sparkles" class="w-6 h-6 mb-1"></i> Chef IA</button>
+                    <button onclick="state.view='carrito'; render()" class="flex flex-col items-center text-xs p-2 rounded-xl transition-all ${state.view==='carrito'?'text-purple-600 bg-purple-50':'text-gray-400'} relative">
+                        <div class="relative">
+                            <i data-lucide="shopping-bag" class="w-6 h-6 mb-1"></i>
+                            ${state.cart.length > 0 ? '<span class="absolute -top-1 -right-1 bg-red-500 w-2.5 h-2.5 rounded-full border-2 border-white"></span>' : ''}
+                        </div>
+                        Pedido
+                    </button>
+                </div>
+            </div>`;
+        }
+
+        function getClientContent(total) {
+            if (state.view === 'inicio') {
+                return `
+                <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-3xl p-8 mb-8 relative overflow-hidden shadow-xl transform transition hover:scale-[1.01]">
+                    <div class="relative z-10">
+                        <h2 class="text-3xl font-bold mb-2 font-serif">Bienvenido</h2>
+                        <p class="opacity-90 mb-6">¿Qué se te antoja hoy?</p>
+                        <button onclick="state.view='carrito'; render()" class="bg-white text-purple-700 px-6 py-2 rounded-full font-bold shadow-lg hover:bg-purple-50 transition">Ver mi Carrito</button>
+                    </div>
+                    <div class="absolute -bottom-10 -right-10 text-9xl opacity-20 rotate-12">🎂</div>
+                </div>
+                <h3 class="font-bold text-gray-700 text-xl mb-4 pl-2 border-l-4 border-purple-500">Nuestros Postres</h3>
+                <div class="grid grid-cols-2 gap-4 mb-20">
+                    ${state.products.map(p => `
+                        <div class="bg-white p-3 rounded-xl shadow-sm border text-center hover:shadow-md transition-all relative group">
+                            <div class="text-4xl mb-2 transform group-hover:scale-110 transition-transform duration-300">${p.img}</div>
+                            <p class="font-bold text-sm text-gray-800 line-clamp-1">${p.nombre}</p>
+                            <p class="text-purple-600 font-bold text-sm mb-2">S/ ${p.precio.toFixed(2)}</p>
+                            <button onclick="addToCart(${p.id})" class="w-full bg-purple-50 text-purple-700 hover:bg-purple-600 hover:text-white py-2 rounded-lg font-bold text-xs transition-colors">Agregar</button>
+                        </div>
+                    `).join('')}
+                </div>`;
+            }
+            if (state.view === 'carrito') {
+                return `
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-purple-100 min-h-[60vh] flex flex-col">
+                    <h3 class="font-bold text-lg mb-4 border-b pb-2 flex items-center gap-2"><i data-lucide="shopping-cart" class="w-5 h-5"></i> Tu Pedido</h3>
+                    <div class="flex-1 space-y-3 mb-4 overflow-y-auto">
+                        ${state.cart.length === 0 ? '<div class="text-center py-10 text-gray-400 italic"><i data-lucide="shopping-bag" class="w-10 h-10 mx-auto mb-2 opacity-30"></i><p>Tu carrito está vacío</p></div>' : 
+                          state.cart.map(i => `
+                            <div class="flex justify-between text-sm border-b border-dashed pb-2 last:border-0 items-center">
+                                <span><b class="text-purple-700">${i.cant}x</b> ${i.nombre}</span>
+                                <span class="font-medium">S/ ${(i.precio * i.cant).toFixed(2)}</span>
+                            </div>`).join('')}
+                    </div>
+                    <div class="border-t-2 border-gray-100 pt-4 mt-auto">
+                        <div class="flex justify-between font-bold text-xl mb-6 text-purple-900"><span>Total</span><span>${formatCurrency(total)}</span></div>
+                        <button onclick="processSale()" ${state.cart.length===0?'disabled':''} class="w-full btn-magic py-3 rounded-xl font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed shadow-lg">Realizar Pedido</button>
+                    </div>
+                </div>`;
+            }
+            if (state.view === 'asistente') {
+                return `
+                <div class="flex flex-col h-[calc(100vh-160px)] bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+                    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 text-white text-center relative overflow-hidden">
+                        <div class="relative z-10">
+                            <h3 class="font-bold text-2xl font-serif">Chef Santa Teresa</h3>
+                            <p class="text-purple-100 text-sm opacity-90">Tu experto sommelier de postres con IA</p>
+                        </div>
+                        <div class="absolute -top-10 -right-10 text-9xl opacity-10">👨‍🍳</div>
+                    </div>
+                    <div class="flex-1 p-4 overflow-y-auto bg-slate-50 space-y-4">
+                        <!-- Mensaje Bienvenida -->
+                        <div class="flex gap-3">
+                            <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-sm border border-purple-200 flex-shrink-0">👨‍🍳</div>
+                            <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 text-sm text-gray-700 max-w-[85%]">
+                                ¡Hola! Soy el Chef de la casa. Cuéntame qué se te antoja hoy o cómo te sientes, y te recomendaré el postre perfecto. ✨
+                            </div>
+                        </div>
+                        
+                        <!-- Respuesta IA -->
+                        ${state.assistant.response ? `
+                        <div class="flex gap-3 fade-in">
+                            <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-sm border border-purple-200 flex-shrink-0">👨‍🍳</div>
+                            <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 text-sm text-gray-700 max-w-[85%]">
+                                ${state.assistant.response}
+                            </div>
+                        </div>` : ''}
+                        
+                        <!-- Loading -->
+                        ${state.assistant.loading ? `
+                        <div class="flex gap-3 fade-in">
+                            <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-sm border border-purple-200 flex-shrink-0">👨‍🍳</div>
+                            <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 flex gap-1 items-center">
+                                <div class="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce"></div>
+                                <div class="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce delay-75"></div>
+                                <div class="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce delay-150"></div>
+                            </div>
+                        </div>` : ''}
+                    </div>
+                    <div class="p-3 bg-white border-t border-gray-100 flex gap-2">
+                        <input id="aiQuery" type="text" class="flex-1 bg-gray-50 border border-gray-200 rounded-full px-4 py-2 outline-none text-sm focus:ring-2 focus:ring-purple-500 transition-all" placeholder="Ej: Algo con chocolate para festejar..." onkeypress="if(event.key==='Enter') askChef()">
+                        <button onclick="askChef()" class="bg-purple-600 text-white p-2 rounded-full hover:bg-purple-700 transition shadow-sm"><i data-lucide="send" class="w-4 h-4"></i></button>
+                    </div>
+                </div>`;
+            }
+        }
+
+        // Inicializar
+        render();
+    </script>
+</body>
+</html>
